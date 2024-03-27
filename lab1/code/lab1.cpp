@@ -73,7 +73,7 @@ int main() {
         std::cout << "Sequence: ";
         std::copy(std::begin(seq), std::end(seq), std::ostream_iterator<int>{std::cout, " "});
 
-        execute(seq, std::vector<int>{2, 1});
+        execute(seq, std::vector<int>{2, 1}); // TODO: assert fails here
 
         std::cout << "\nEmpty sequence: ";
         std::vector<int> empty;
@@ -206,7 +206,21 @@ void execute(std::vector<int>& V, const std::vector<int>& res) {
 
 // Iterative algorithm
 void TND004::stable_partition_iterative(std::vector<int>& V, std::function<bool(int)> p) {
-    // IMPLEMENT before Lab1 HA
+    std::vector<int> res;
+    int start_offset = 0;
+    
+    for(int i = 0;i < V.size();i++)
+    {
+        if(p(V[i]))
+        {
+            res.insert(res.begin() + start_offset, V[i]);
+            start_offset++;
+        }
+        else
+            res.push_back(V[i]);
+    }
+
+    V = res;
 }
 
 // Auxiliary function that performs the stable partition recursively
@@ -216,7 +230,7 @@ void TND004::stable_partition_iterative(std::vector<int>& V, std::function<bool(
 std::vector<int>::iterator TND004::stable_partition(std::vector<int>::iterator first,
                                                     std::vector<int>::iterator last,
                                                     std::function<bool(int)> p) {
-    // IMPLEMENT
-
-    return first;  // delete this line
+    
+    
+    return first;
 }
