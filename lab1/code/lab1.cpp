@@ -73,7 +73,7 @@ int main() {
         std::cout << "Sequence: ";
         std::copy(std::begin(seq), std::end(seq), std::ostream_iterator<int>{std::cout, " "});
 
-        execute(seq, std::vector<int>{2, 1}); // TODO: assert fails here
+        execute(seq, std::vector<int>{2, 1});
 
         std::cout << "\nEmpty sequence: ";
         std::vector<int> empty;
@@ -196,12 +196,10 @@ void execute(std::vector<int>& V, const std::vector<int>& res) {
     TND004::stable_partition_iterative(V, even);
     assert(V == res);  // compare with the expected result
 
-    /*
     // Uncomment for exercise 2
     std::cout << "Divide-and-conquer stable partition\n";
     TND004::stable_partition(copy_, even);
     assert(copy_ == res);  // compare with the expected result
-    */
 }
 
 // Iterative algorithm
@@ -209,7 +207,7 @@ void TND004::stable_partition_iterative(std::vector<int>& V, std::function<bool(
     std::vector<int> res;
     int start_offset = 0;
     
-    for(int i = 0;i < V.size();i++)
+    for(int i = 0;i < (int)V.size();i++)
     {
         if(p(V[i]))
         {
@@ -230,7 +228,22 @@ void TND004::stable_partition_iterative(std::vector<int>& V, std::function<bool(
 std::vector<int>::iterator TND004::stable_partition(std::vector<int>::iterator first,
                                                     std::vector<int>::iterator last,
                                                     std::function<bool(int)> p) {
-    
-    
-    return first;
+    if(first != last) // Make sure the set is not empty
+    {
+        std::vector<int>::iterator mid = first + (last - first)/2; // Find the middle element
+
+        if(first + 1 != last) // If we're not looking at a one-element set
+        {
+            // Find the two rotation points by calling the function recursively 
+            std::vector<int>::iterator rot1 = TND004::stable_partition(first, mid, p);
+            std::vector<int>::iterator rot2 = TND004::stable_partition(mid, last, p);
+
+            // Return the point of rotation
+            auto ret = std::rotate(rot1, mid, rot2);
+            return ret;
+        }
+        else if(p(*first)) // If we're in a one-element set, check if the element's value has property p
+            return last;
+    }
+    return first; // Return first as the default case
 }
