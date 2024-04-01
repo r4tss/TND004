@@ -204,21 +204,19 @@ void execute(std::vector<int>& V, const std::vector<int>& res) {
 
 // Iterative algorithm
 void TND004::stable_partition_iterative(std::vector<int>& V, std::function<bool(int)> p) {
-    std::vector<int> res;
-    int start_offset = 0;
+    std::vector<int> res_t, res_f;
     
-    for(int i = 0;i < (int)V.size();i++)
+    for(int i = 0;i < (int)V.size();i++) // O(n + 2) complexity
     {
         if(p(V[i]))
-        {
-            res.insert(res.begin() + start_offset, V[i]);
-            start_offset++;
-        }
+            res_t.push_back(V[i]);
         else
-            res.push_back(V[i]);
+            res_f.push_back(V[i]);
     }
 
-    V = res;
+    res_t.insert(res_t.end(), res_f.begin(), res_f.end()); // O(2n) complexity
+
+    V = res_t; // total: O(3n + 2) => O(n) complexity
 }
 
 // Auxiliary function that performs the stable partition recursively
