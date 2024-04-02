@@ -214,9 +214,9 @@ void TND004::stable_partition_iterative(std::vector<int>& V, std::function<bool(
             res_f.push_back(V[i]);
     }
 
-    res_t.insert(res_t.end(), res_f.begin(), res_f.end()); // O(2n) complexity
+    res_t.insert(res_t.end(), res_f.begin(), res_f.end()); // O(n) complexity
 
-    V = res_t; // total: O(3n + 2) => O(n) complexity
+    V = res_t; // total: O(2n + 2) => O(n) complexity
 }
 
 // Auxiliary function that performs the stable partition recursively
@@ -228,10 +228,11 @@ std::vector<int>::iterator TND004::stable_partition(std::vector<int>::iterator f
                                                     std::function<bool(int)> p) {
     if(first != last) // Make sure the set is not empty
     {
-        std::vector<int>::iterator mid = first + (last - first)/2; // Find the middle element
-
         if(first + 1 != last) // If we're not looking at a one-element set
         {
+            // Find the middle element
+            std::vector<int>::iterator mid = first + (last - first)/2;
+            
             // Find the two rotation points by calling the function recursively 
             std::vector<int>::iterator rot1 = TND004::stable_partition(first, mid, p);
             std::vector<int>::iterator rot2 = TND004::stable_partition(mid, last, p);
