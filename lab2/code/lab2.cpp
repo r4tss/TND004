@@ -217,6 +217,7 @@ int main() {
         Set S2{A2};
 
         S1 += S2;
+        std::cout << S1 + S2 << "\n";
         assert(Set::get_count_nodes() == 13);
 
         S2 *= S2;

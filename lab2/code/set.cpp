@@ -18,14 +18,16 @@ int Set::get_count_nodes() {
  *  Default constructor :create an empty Set
  */
 Set::Set() : counter{0} {
-    // IMPLEMENT before Lab2 HA
+    head = new Node(0, nullptr, nullptr);
+    tail = new Node(0, nullptr, head);
+    head->next = tail;
 }
 
 /*
  *  Conversion constructor: convert val into a singleton {val}
  */
 Set::Set(int val) : Set{} {  // create an empty list
-    // IMPLEMENT before Lab2 HA
+    insert_node(head, val);
 }
 
 /*
@@ -33,7 +35,13 @@ Set::Set(int val) : Set{} {  // create an empty list
  * Create a Set with all ints in sorted vector list_of_values
  */
 Set::Set(const std::vector<int>& list_of_values) : Set{} {  // create an empty list
-    // IMPLEMENT before Lab2 HA
+    Node* n = head;
+    
+    for(int i = 0;i < std::ssize(list_of_values);i++)
+    {
+        insert_node(n, list_of_values[i]);
+        n = n->next;
+    }
 }
 
 /*
@@ -42,7 +50,15 @@ Set::Set(const std::vector<int>& list_of_values) : Set{} {  // create an empty l
  * Function does not modify Set S in any way
  */
 Set::Set(const Set& S) : Set{} {  // create an empty list
-    // IMPLEMENT before Lab2 HA
+    Node* n_original = S.head;
+    Node* n_copy = head;
+
+    while(n_original->next != S.tail)
+    {
+        n_original = n_original->next;
+        insert_node(n_copy, n_original->value);
+        n_copy = n_copy->next;
+    }
 }
 
 /*
@@ -50,14 +66,29 @@ Set::Set(const Set& S) : Set{} {  // create an empty list
  * Remove all nodes from the list, except the dummy nodes
  */
 void Set::make_empty() {
-    // IMPLEMENT before Lab2 HA
+    if(is_empty())
+        return;
+
+    Node* n = head->next;
+
+    while(!is_empty())
+    {
+        n = n->next;
+        remove_node(n->prev);
+    }
+
+    head->next = tail;
+    tail->prev = head;
 }
 
 /*
  * Destructor: deallocate all memory (Nodes) allocated for the list
  */
 Set::~Set() {
-    // IMPLEMENT before Lab2 HA
+    make_empty();
+    
+    delete head;
+    delete tail;
 }
 
 /*
@@ -66,7 +97,10 @@ Set::~Set() {
  * Call by valued is used
  */
 Set& Set::operator=(Set S) {
-    // IMPLEMENT before Lab2 HA
+    std::swap(head, S.head);
+    std::swap(tail, S.tail);
+    std::swap(counter, S.counter);
+    
     return *this;
 }
 
@@ -76,8 +110,17 @@ Set& Set::operator=(Set S) {
  * This function does not modify the Set in any way
  */
 bool Set::is_member(int val) const {
-    // IMPLEMENT before Lab2 HA
-    return false;  // remove this line
+    Node* n = head;
+
+    while(n != tail)
+    {
+        n = n->next;
+
+        if(n->value == val)
+            return true;
+    }
+    
+    return false;
 }
 
 /*
@@ -86,8 +129,22 @@ bool Set::is_member(int val) const {
  * Return false, otherwise
  */
 bool Set::operator==(const Set& S) const {
-    // IMPLEMENT before Lab2 HA
-    return false;  // remove this line
+    if(counter != S.counter)
+        return false;
+    
+    Node* n_current = head;
+    Node* n_compare = S.head;
+
+    while(n_current != tail)
+    {
+        n_current = n_current->next;
+        n_compare = n_compare->next;
+
+        if(n_current->value != n_compare->value)
+            return false;
+    }
+    
+    return true;
 }
 
 /*
@@ -98,7 +155,42 @@ bool Set::operator==(const Set& S) const {
  * Return std::partial_ordering::unordered, otherwise
  */
 std::partial_ordering Set::operator<=>(const Set& S) const {
-    // IMPLEMENT before Lab2 HA
+    if(*this == S)
+        return std::partial_ordering::equivalent;
+
+    if(counter < S.counter)
+    {
+        Node* n_current = head->next;
+        Node* n_compare = S.head;
+
+        while(n_compare != S.tail)
+        {
+            n_compare = n_compare->next;
+
+            if(n_current->value == n_compare->value)
+                n_current = n_current->next;
+
+            if(n_current == tail)
+                return std::partial_ordering::less;
+        }
+    }
+    else
+    {
+        Node* n_current = head;
+        Node* n_compare = S.head->next;
+
+        while(n_current != tail)
+        {
+            n_current = n_current->next;
+
+            if(n_current->value == n_compare->value)
+                n_compare = n_compare->next;
+
+            if(n_compare == S.tail)
+                return std::partial_ordering::greater;
+        }
+    }
+    
     return std::partial_ordering::unordered; // remove this line
 }
 
@@ -107,7 +199,54 @@ std::partial_ordering Set::operator<=>(const Set& S) const {
  * Set *this is modified and then returned
  */
 Set& Set::operator+=(const Set& S) {
-    // IMPLEMENT
+    Node* n_counter = head;
+    Node* n_current = head->next;
+    Node* n_other = S.head->next;
+
+    while(n_current->next != nullptr && n_other->next != nullptr)
+    {
+        if(n_current->value < n_other->value)
+        {
+            insert_node(n_counter, n_current->value);
+            n_counter = n_counter->next;
+            n_current = n_current->next;
+        }
+        else if(n_current->value > n_other->value)
+        {
+            insert_node(n_counter, n_other->value);
+            n_counter = n_counter->next;
+            n_other = n_other->next;
+        }
+        else
+        {
+            insert_node(n_counter, n_current->value);
+            n_counter = n_counter->next;
+            n_current = n_current->next;
+            n_other = n_other->next;
+        }
+    }
+
+    while(n_current != tail)
+    {
+        insert_node(n_counter, n_current->value);
+        n_counter = n_counter->next;
+        n_current = n_current->next;
+    }
+
+    while(n_other != S.tail)
+    {
+        insert_node(n_counter, n_other->value);
+        n_counter = n_counter->next;
+        n_other = n_other->next;
+    }
+
+    n_counter = n_counter->next;
+    while(n_counter != tail)
+    {
+        n_counter = n_counter->next;
+        remove_node(n_counter->prev);
+    }
+    
     return *this;
 }
 
@@ -116,7 +255,33 @@ Set& Set::operator+=(const Set& S) {
  * Set *this is modified and then returned
  */
 Set& Set::operator*=(const Set& S) {
-    // IMPLEMENT
+    Node* n_current = head->next;
+    Node* n_other = S.head->next;
+
+    while(n_current != tail && n_other != S.tail)
+    {
+        if(n_current->value < n_other->value)
+        {
+            n_current = n_current->next;
+            remove_node(n_current->prev);
+        }
+        else if(n_current->value > n_other->value)
+        {
+            n_other = n_other->next;
+        }
+        else
+        {
+            n_current = n_current->next;
+            n_other = n_other->next;
+        }
+    }
+
+    while(n_current != tail)
+    {
+        n_current = n_current->next;
+        remove_node(n_current->prev);
+    }
+    
     return *this;
 }
 
@@ -125,7 +290,27 @@ Set& Set::operator*=(const Set& S) {
  * Set *this is modified and then returned
  */
 Set& Set::operator-=(const Set& S) {
-    // IMPLEMENT
+    Node* n_current = head->next;
+    Node* n_other = S.head->next;
+
+    while(n_current != tail && n_other != S.tail)
+    {
+        if(n_current->value == n_other->value)
+        {
+            n_current = n_current->next;
+            n_other = n_other->next;
+            remove_node(n_current->prev);
+        }
+        else if(n_current->value < n_other->value)
+        {
+            n_current = n_current->next;
+        }
+        else
+        {
+            n_other = n_other->next;
+        }
+    }
+    
     return *this;
 }
 
@@ -140,7 +325,9 @@ Set& Set::operator-=(const Set& S) {
  * \param val value to be inserted  after position p
  */
 void Set::insert_node(Node* p, int val) {
-    // IMPLEMENT before Lab2 HA
+    Node* n = new Node(val, p->next, p);
+    p->next = p->next->prev = n;
+    counter++;
 }
 
 /*
@@ -148,7 +335,10 @@ void Set::insert_node(Node* p, int val) {
  * \param p pointer to a Node
  */
 void Set::remove_node(Node* p) {
-    // IMPLEMENT before Lab2 HA
+    p->next->prev = p->prev;
+    p->prev->next = p->next;
+    delete p;
+    counter--;
 }
 
 /*
