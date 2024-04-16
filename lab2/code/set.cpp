@@ -191,7 +191,7 @@ std::partial_ordering Set::operator<=>(const Set& S) const {
         }
     }
     
-    return std::partial_ordering::unordered; // remove this line
+    return std::partial_ordering::unordered;
 }
 
 /*
@@ -199,52 +199,30 @@ std::partial_ordering Set::operator<=>(const Set& S) const {
  * Set *this is modified and then returned
  */
 Set& Set::operator+=(const Set& S) {
-    Node* n_counter = head;
     Node* n_current = head->next;
     Node* n_other = S.head->next;
 
-    while(n_current->next != nullptr && n_other->next != nullptr)
+    while(n_other != S.tail)
     {
-        if(n_current->value < n_other->value)
+        if(n_current == tail)
         {
-            insert_node(n_counter, n_current->value);
-            n_counter = n_counter->next;
+            insert_node(n_current->prev, n_other->value);
+            n_other = n_other->next;
+        }
+        else if(n_current->value < n_other->value)
+        {
             n_current = n_current->next;
         }
         else if(n_current->value > n_other->value)
         {
-            insert_node(n_counter, n_other->value);
-            n_counter = n_counter->next;
+            insert_node(n_current->prev, n_other->value);
             n_other = n_other->next;
         }
         else
         {
-            insert_node(n_counter, n_current->value);
-            n_counter = n_counter->next;
             n_current = n_current->next;
             n_other = n_other->next;
         }
-    }
-
-    while(n_current != tail)
-    {
-        insert_node(n_counter, n_current->value);
-        n_counter = n_counter->next;
-        n_current = n_current->next;
-    }
-
-    while(n_other != S.tail)
-    {
-        insert_node(n_counter, n_other->value);
-        n_counter = n_counter->next;
-        n_other = n_other->next;
-    }
-
-    n_counter = n_counter->next;
-    while(n_counter != tail)
-    {
-        n_counter = n_counter->next;
-        remove_node(n_counter->prev);
     }
     
     return *this;
