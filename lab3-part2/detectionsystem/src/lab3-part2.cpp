@@ -7,7 +7,10 @@
 #include <rendering/window.h>
 #include <fmt/format.h>
 
+#include <map>
 #include <unordered_map>
+#include <set>
+#include <fstream>
 
 void plotData(const std::string& name);
 
@@ -16,9 +19,9 @@ void findPattern(const std::string& name);
 /* ************************************* */
 
 int main() try {
-    std::cout << "Enter the name of input points file: ";
-    std::string s;
-    std::cin >> s;  // e.g. points1.txt, points200.txt, largeMystery.txt
+    std::cout << "Enter the name of input points file: \n";
+    std::string s = "largeMystery.txt";
+    //std::cin >> s;  // e.g. points1.txt, points200.txt, largeMystery.txt
     
     findPattern(s);
     plotData(s);
@@ -46,45 +49,93 @@ void plotData(const std::string& name) {
     }
 }
 
-struct hash_points {
-    // Change to work with points
-    // https://www.geeksforgeeks.org/how-to-create-an-unordered_map-of-pairs-in-c/
-    template <class T1, class T2>
-    size_t operator()(const pair<T1, T2>& p) const
-    {
-        auto hash1 = hash<T1>{}(p.first);
-        auto hash2 = hash<T2>{}(p.second);
- 
-        if (hash1 != hash2) {
-            return hash1 ^ hash2;              
-        }
-         
-        // If hash1 == hash2, their XOR is zero.
-          return hash1;
-    }
-};
-
 void findPattern(const std::string& name) {
     std::filesystem::path points_name = name;
     const auto points = readPoints(data_dir / points_name);
 
-    std::unordered_map<float, std::unordered_map<rendering::Point, bool>, hash_points> slopes;
+    std::set<std::pair<int, std::set<std::pair<int, int>>>> lines;
 
-    for(int i = 0;i < std::ssize(points);i++)
+    size_t allowedSize = 0;
+    for(int i = 0;i < std::ssize(points) - 1;i++)
     {
-        for(int j = std::ssize(points) - 1;j >= 0;j--)
+        std::unordered_map<float, std::set<std::pair<int, int>>> slopes;
+
+        for(int j = i + 1;j < std::ssize(points);j++)
         {
-            const float key = (points[j].position.y - points[i].position.y)/(points[j].position.x - points[i].position.x);
-            if(i != j && key != -std::numeric_limits<double>::infinity())
+            float X1 = points[i].position.x * 32767;
+            float Y1 = points[i].position.y * 32767;
+            float X2 = points[j].position.x * 32767;
+            float Y2 = points[j].position.y * 32767;
+
+            float key;
+            if(X1 != X2)
+                key = (Y2 - Y1)/(X2 - X1);
+            else
+                key = std::numeric_limits<float>::infinity();
+
+            //slopes[key].insert({ X1 * 32767, Y1 * 32767 });
+            //slopes[key].insert({ X2 * 32767, Y2 * 32767 });
+            if(i != j)
             {
-                if(slopes[key].size() == 1)
-                    slopes[key][points[i]] = true;
-                slopes[key][(points[j]] = true;
+                if(key == -0)
+                    key = 0;
+                slopes[key].insert({ X1, Y1 });
+                slopes[key].insert({ X2, Y2 });
+            }
+
+            //float key = (points[j].position.y - points[i].position.y)/(points[j].position.x - points[i].position.x);
+
+            //if(i != j && key >= 0)
+            //{
+            //    key = std::abs(key);
+            //    slopes[key].insert({ points[j].position.x * 32767, points[j].position.y * 32767 });
+            //    slopes[key].insert({ points[i].position.x * 32767, points[i].position.y * 32767 });
+            //}
+        }
+
+        for(auto& e : slopes)
+        {
+            if(e.second.size() > 3)
+            {
+                std::cout << "Current size: " << e.second.size() << "\tAllowed size: " << allowedSize << "\n";
+                if(e.second.size() >= allowedSize)
+                {
+                    lines.insert({ (*(e.second.begin())).second, e.second });
+                    allowedSize = e.second.size();
+                    std::cout << "Slope: " << e.first << "\n";
+                    for(auto i : e.second)
+                    {
+                        std::cout << "X: " << i.first << "\tY: " << i.second << "\n";
+                    }
+                    std::cout << "\n";
+                }
+                else
+                {
+                    std::cout << "Decrease allowed size\n\n";
+                    allowedSize--;
+                }
             }
         }
     }
 
-    for(auto& it : slopes)
+    std::filesystem::path segments_name = "segments-" + name;
+    std::ofstream output;
+    output.open(data_dir / "output" / segments_name);
+
+    for(auto i : lines)
     {
+        std::pair<int, int> p1 = *(i.second.begin());
+        std::pair<int, int> p2 = *(--i.second.end());
+        output << p1.first << " " << p1.second << " " << p2.first << " " << p2.second << "\n";
+
+        for(auto j : i.second)
+        {
+            if(j != *(--i.second.end()))
+                std::cout << "(" << j.first << "," << j.second << ")->";
+            else
+                std::cout << "(" << j.first << "," << j.second << ")\n";
+        }
     }
+
+    output.close();
 }
