@@ -7,23 +7,22 @@
 #include <rendering/window.h>
 #include <fmt/format.h>
 
-#include <map>
 #include <unordered_map>
 #include <set>
 #include <fstream>
 
 void plotData(const std::string& name);
 
-void findPattern(const std::string& name);
+void findSegments(const std::string& name);
 
 /* ************************************* */
 
 int main() try {
     std::cout << "Enter the name of input points file: \n";
-    std::string s = "largeMystery.txt";
+    std::string s = "points1423.txt";
     //std::cin >> s;  // e.g. points1.txt, points200.txt, largeMystery.txt
     
-    findPattern(s);
+    findSegments(s);
     plotData(s);
 } catch (const std::exception& e) {
     fmt::print("Error: {}", e.what());
@@ -49,13 +48,14 @@ void plotData(const std::string& name) {
     }
 }
 
-void findPattern(const std::string& name) {
+void findSegments(const std::string& name) {
     std::filesystem::path points_name = name;
     const auto points = readPoints(data_dir / points_name);
 
     std::set<std::pair<int, std::set<std::pair<int, int>>>> lines;
 
-    size_t allowedSize = 0;
+    // Gather segments
+    //size_t allowedSize = 0;
     for(int i = 0;i < std::ssize(points) - 1;i++)
     {
         std::unordered_map<float, std::set<std::pair<int, int>>> slopes;
@@ -97,27 +97,67 @@ void findPattern(const std::string& name) {
         {
             if(e.second.size() > 3)
             {
-                std::cout << "Current size: " << e.second.size() << "\tAllowed size: " << allowedSize << "\n";
-                if(e.second.size() >= allowedSize)
-                {
+                //std::cout << "Current size: " << e.second.size() << "\tAllowed size: " << allowedSize << "\n";
+                //if(e.second.size() >= allowedSize)
+                //{
                     lines.insert({ (*(e.second.begin())).second, e.second });
-                    allowedSize = e.second.size();
-                    std::cout << "Slope: " << e.first << "\n";
-                    for(auto i : e.second)
-                    {
-                        std::cout << "X: " << i.first << "\tY: " << i.second << "\n";
-                    }
-                    std::cout << "\n";
-                }
-                else
-                {
-                    std::cout << "Decrease allowed size\n\n";
-                    allowedSize--;
-                }
+                    //allowedSize = e.second.size();
+                    //std::cout << "Slope: " << e.first << "\n";
+                    //for(auto i : e.second)
+                    //{
+                    //    std::cout << "X: " << i.first << "\tY: " << i.second << "\n";
+                    //}
+                    //std::cout << "\n";
+                //}
+                //else
+                //{
+                //    std::cout << "Decrease allowed size\n\n";
+                //    allowedSize--;
+                //}
             }
         }
     }
 
+    // Remove short segments
+    for(auto i = lines.begin();i != lines.end();++i)
+    {
+        for(auto j = lines.begin();j != lines.end();)
+        {
+            if(i != j)
+            {
+                std::pair<int, int> p11 = *((*i).second.begin());
+                std::pair<int, int> p12 = *(--(*i).second.end());
+                std::pair<int, int> p21 = *((*j).second.begin());
+                std::pair<int, int> p22 = *(--(*j).second.end());
+
+                int slope1, slope2;
+                if(p11.first != p12.first)
+                    slope1 = (p12.second - p11.second)/(p12.first - p11.first);
+                else
+                    slope1 = 2147483647;
+
+                if(p21.first != p22.first)
+                    slope2 = (p22.second - p21.second)/(p22.first - p21.first);
+                else
+                    slope2 = 2147483647;
+
+                //if(p11.first == 4096 && p11.second == 22016 && p21.first == 4096 && p21.second == 20992)
+                //std::cout << "Slopes: " << std::setw(10) << slope1 << std::setw(12) << slope2 << std::setw(10) << "(" << p11.first << ", " << p11.second << ")" << std::setw(10) << "(" << p12.first << ", " << p12.second << ")" << std::setw(10) << "(" << p21.first << ", " << p21.second << ")" << std::setw(10) << "(" << p22.first << ", " << p22.second << ")\n";
+                if(slope1 == slope2 && p11.first >= p21.first && p11.second >= p21.second && p12.first <= p22.first && p12.second <= p22.second)
+                {
+                    //std::cout << "Removed!\n";
+                    i = lines.erase(i);
+                    j = lines.begin();
+                }
+                else
+                    ++j;
+            }
+            else
+                ++j;
+        }
+    }
+
+    // Print segments to std::cout and output file
     std::filesystem::path segments_name = "segments-" + name;
     std::ofstream output;
     output.open(data_dir / "output" / segments_name);
