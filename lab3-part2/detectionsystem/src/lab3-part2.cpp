@@ -19,8 +19,8 @@ void findSegments(const std::string& name);
 
 int main() try {
     std::cout << "Enter the name of input points file: \n";
-    std::string s = "largeMystery.txt";
-    //std::cin >> s;  // e.g. points1.txt, points200.txt, largeMystery.txt
+    std::string s;
+    std::cin >> s;  // e.g. points1.txt, points200.txt, largeMystery.txt
     
     findSegments(s);
     plotData(s);
@@ -110,9 +110,7 @@ void findSegments(const std::string& name) {
                     slope2 = (p22.second - p21.second)/(p22.first - p21.first);
                 else
                     slope2 = 2147483647;
-
-                //if(p11.first == 4096 && p11.second == 22016 && p21.first == 4096 && p21.second == 20992)
-                //std::cout << "Slopes: " << std::setw(10) << slope1 << std::setw(12) << slope2 << std::setw(10) << "(" << p11.first << ", " << p11.second << ")" << std::setw(10) << "(" << p12.first << ", " << p12.second << ")" << std::setw(10) << "(" << p21.first << ", " << p21.second << ")" << std::setw(10) << "(" << p22.first << ", " << p22.second << ")\n";
+                
                 if(slope1 == slope2 && p11.first >= p21.first && p11.second >= p21.second && p12.first <= p22.first && p12.second <= p22.second)
                 {
                     i = lines.erase(i);
