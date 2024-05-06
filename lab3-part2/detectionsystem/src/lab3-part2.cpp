@@ -105,12 +105,12 @@ void findSegments(const std::string& name) {
                 if(p11.first != p12.first)
                     slope1 = (p12.second - p11.second)/(p12.first - p11.first);
                 else
-                    slope1 = 2147483647;
+                    slope1 = std::numeric_limits<int>::max();
 
                 if(p21.first != p22.first)
                     slope2 = (p22.second - p21.second)/(p22.first - p21.first);
                 else
-                    slope2 = 2147483647;
+                    slope2 = std::numeric_limits<int>::max();
                 
                 if(slope1 == slope2 && p11.first >= p21.first && p11.second >= p21.second && p12.first <= p22.first && p12.second <= p22.second)
                 {
