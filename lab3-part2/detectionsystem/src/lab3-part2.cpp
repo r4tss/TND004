@@ -19,7 +19,7 @@ void findSegments(const std::string& name);
 
 int main() try {
     std::cout << "Enter the name of input points file: \n";
-    std::string s = "points1423.txt";
+    std::string s = "largeMystery.txt";
     //std::cin >> s;  // e.g. points1.txt, points200.txt, largeMystery.txt
     
     findSegments(s);
@@ -53,9 +53,6 @@ void findSegments(const std::string& name) {
     const auto points = readPoints(data_dir / points_name);
 
     std::set<std::pair<int, std::set<std::pair<int, int>>>> lines;
-
-    // Gather segments
-    //size_t allowedSize = 0;
     for(int i = 0;i < std::ssize(points) - 1;i++)
     {
         std::unordered_map<float, std::set<std::pair<int, int>>> slopes;
@@ -72,9 +69,7 @@ void findSegments(const std::string& name) {
                 key = (Y2 - Y1)/(X2 - X1);
             else
                 key = std::numeric_limits<float>::infinity();
-
-            //slopes[key].insert({ X1 * 32767, Y1 * 32767 });
-            //slopes[key].insert({ X2 * 32767, Y2 * 32767 });
+            
             if(i != j)
             {
                 if(key == -0)
@@ -82,38 +77,13 @@ void findSegments(const std::string& name) {
                 slopes[key].insert({ X1, Y1 });
                 slopes[key].insert({ X2, Y2 });
             }
-
-            //float key = (points[j].position.y - points[i].position.y)/(points[j].position.x - points[i].position.x);
-
-            //if(i != j && key >= 0)
-            //{
-            //    key = std::abs(key);
-            //    slopes[key].insert({ points[j].position.x * 32767, points[j].position.y * 32767 });
-            //    slopes[key].insert({ points[i].position.x * 32767, points[i].position.y * 32767 });
-            //}
         }
 
         for(auto& e : slopes)
         {
             if(e.second.size() > 3)
             {
-                //std::cout << "Current size: " << e.second.size() << "\tAllowed size: " << allowedSize << "\n";
-                //if(e.second.size() >= allowedSize)
-                //{
-                    lines.insert({ (*(e.second.begin())).second, e.second });
-                    //allowedSize = e.second.size();
-                    //std::cout << "Slope: " << e.first << "\n";
-                    //for(auto i : e.second)
-                    //{
-                    //    std::cout << "X: " << i.first << "\tY: " << i.second << "\n";
-                    //}
-                    //std::cout << "\n";
-                //}
-                //else
-                //{
-                //    std::cout << "Decrease allowed size\n\n";
-                //    allowedSize--;
-                //}
+                lines.insert({ (*(e.second.begin())).second, e.second });
             }
         }
     }
@@ -145,9 +115,11 @@ void findSegments(const std::string& name) {
                 //std::cout << "Slopes: " << std::setw(10) << slope1 << std::setw(12) << slope2 << std::setw(10) << "(" << p11.first << ", " << p11.second << ")" << std::setw(10) << "(" << p12.first << ", " << p12.second << ")" << std::setw(10) << "(" << p21.first << ", " << p21.second << ")" << std::setw(10) << "(" << p22.first << ", " << p22.second << ")\n";
                 if(slope1 == slope2 && p11.first >= p21.first && p11.second >= p21.second && p12.first <= p22.first && p12.second <= p22.second)
                 {
-                    //std::cout << "Removed!\n";
                     i = lines.erase(i);
-                    j = lines.begin();
+                    if(i == lines.end())
+                        j = lines.end();
+                    else
+                        j = lines.begin();
                 }
                 else
                     ++j;
