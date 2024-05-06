@@ -18,7 +18,7 @@ void findSegments(const std::string& name);
 /* ************************************* */
 
 int main() try {
-    std::cout << "Enter the name of input points file: \n";
+    std::cout << "Enter the name of input points file: ";
     std::string s;
     std::cin >> s;  // e.g. points1.txt, points200.txt, largeMystery.txt
     
@@ -52,6 +52,7 @@ void findSegments(const std::string& name) {
     std::filesystem::path points_name = name;
     const auto points = readPoints(data_dir / points_name);
 
+    // Gather points
     std::set<std::pair<int, std::set<std::pair<int, int>>>> lines;
     for(int i = 0;i < std::ssize(points) - 1;i++)
     {
@@ -83,7 +84,7 @@ void findSegments(const std::string& name) {
         {
             if(e.second.size() > 3)
             {
-                lines.insert({ (*(e.second.begin())).second, e.second });
+                lines.insert({ (*(e.second.begin())).second, std::move(e.second) });
             }
         }
     }
