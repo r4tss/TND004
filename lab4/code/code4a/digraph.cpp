@@ -106,9 +106,6 @@ void Digraph::uwsssp(int s) const {
 void Digraph::pwsssp(int s) const {
     assert(s >= 1 && s <= size);
 
-    // *** TODO ***
-    // dist vector should be initialized with std::numeric_limits<int>::max()
-
     for(int v = 0;v <= size;v++)
     {
         dist[v] = std::numeric_limits<int>::max();
@@ -185,7 +182,6 @@ void Digraph::printTree() const {
 }
 
 // print shortest path from s to t and the corresponding path length
-// Hint: consider using recursion
 void Digraph::printPath(int t) const {
     bool first = true;
 
