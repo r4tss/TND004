@@ -108,6 +108,47 @@ void Digraph::pwsssp(int s) const {
 
     // *** TODO ***
     // dist vector should be initialized with std::numeric_limits<int>::max()
+
+    for(int v = 0;v <= size;v++)
+    {
+        dist[v] = std::numeric_limits<int>::max();
+        path[v] = 0;
+        done[v] = false;
+    }
+
+    dist[s] = 0;
+    done[s] = 0;
+
+    int v = s;
+
+    while(true)
+    {
+        for(auto& e : table[v])
+        {
+            int u = e.to;
+
+            if(done[u] == false && dist[u] > dist[v] + e.weight)
+            {
+                dist[u] = dist[v] + e.weight;
+                path[u] = v;
+            }
+        }
+        
+        v = 0;
+        
+        for(int i = 0;i <= size;i++)
+        {
+            if(done[i] == false && (v == 0 || dist[v] > dist[i]))
+            {
+                v = i;
+            }
+        }
+
+        if(v == 0)
+            break;
+
+        done[v] = true;
+    }
 }
 
 // print graph
@@ -146,7 +187,26 @@ void Digraph::printTree() const {
 // print shortest path from s to t and the corresponding path length
 // Hint: consider using recursion
 void Digraph::printPath(int t) const {
+    bool first = true;
+
+    if(t < 0)
+    {
+        first = false;
+        t = -t;
+    }
+
     assert(t >= 1 && t <= size);
 
-    // *** TODO ***
+    if(first)
+    {
+        if(dist[t] != 0)
+            printPath(-path[t]);
+        std::cout << "   " << t << "   (" << dist[t] << ")\n"; 
+    }
+    else
+    {
+        if(dist[t] != 0)
+            printPath(-path[t]);
+        std::cout << "   " << t;
+    }
 }
