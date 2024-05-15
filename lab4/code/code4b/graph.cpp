@@ -97,7 +97,7 @@ void Graph::mstPrim() const {
         
         for(int i = 0;i <= size;i++)
         {
-            if(done[i] == false && (v == -1 || dist[v] > dist[i]))
+            if(i != 0 && done[i] == false && (v == -1 || dist[v] > dist[i]))
             {
                 v = i;
             }
@@ -107,15 +107,8 @@ void Graph::mstPrim() const {
             break;
 
         done[v] = true;
-    }
-
-    for(int i = 1;i <= size;i++)
-    {
-        if(done[i] && dist[i] > 0)
-        {
-            std::cout << "( " << path[i] << ", " << i << ", " << dist[i] << ")\n";
-            total_weight += dist[i];
-        }
+        std::cout << "( " << path[v] << ", " << v << ", " << dist[v] << ")\n";
+        total_weight += dist[v];
     }
     
     std::cout << "\nTotal weight = " << total_weight << "\n";
@@ -136,18 +129,16 @@ void Graph::mstKruskal() const {
         }
     }
 
-    std::make_heap(heap.begin(), heap.end());
+    std::make_heap(heap.begin(), heap.end(), std::greater<Edge>{});
 
-    std::sort_heap(heap.begin(), heap.end());
-
-    std::reverse(heap.begin(), heap.end());
-
+    std::sort_heap(heap.begin(), heap.end(), std::greater<Edge>{});
+    
     DSets D = DSets(size);
     
     int counter = 0;
     int total_weight = 0;
 
-    while(counter < size - 1) // Might have to be just size
+    while(counter < size - 1)
     {
         auto top = heap.back();
         heap.pop_back();
@@ -155,12 +146,15 @@ void Graph::mstKruskal() const {
         int u = top.to;
         int v = top.from;
         int w = top.weight;
+
+        int Du = D.find(u);
+        int Dv = D.find(v);
         
-        if(D.find(u) != D.find(v))
+        if(Du != Dv)
         {
             std::cout << "( " << v << ", " << u << ", " << w << ")\n";
             total_weight += w;
-            D.join(D.find(u), D.find(v));
+            D.join(Du, Dv);
             counter++;
         }
     }
