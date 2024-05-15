@@ -75,9 +75,10 @@ void Graph::mstPrim() const {
     std::vector<int> path(size + 1, 0);
     std::vector<bool> done(size + 1, false);
 
-    dist[1] = 0;
-    done[1] = true;
     int v = 1;
+    dist[v] = 0;
+    done[v] = true;
+    int totalWeight = 0;
 
     while(true)
     {
@@ -92,33 +93,78 @@ void Graph::mstPrim() const {
             }
         }
 
-        v = 0;
+        v = -1;
         
         for(int i = 0;i <= size;i++)
         {
-            if(done[i] == false && (v == 0 || dist[v] > dist[i]))
+            if(done[i] == false && (v == -1 || dist[v] > dist[i]))
             {
                 v = i;
             }
         }
         
-        if(v == 0)
+        if(v == -1)
             break;
 
         done[v] = true;
     }
+
+    for(int i = 2;i <= size;i++)
+    {
+        if(done[i])
+        {
+            std::cout << "( " << path[i] << ", " << i << ", " << dist[i] << ")\n";
+            totalWeight += dist[i];
+        }
+    }
+    
+    std::cout << "Total weight = " << totalWeight << "\n";
 }
 
 // Kruskal's minimum spanning tree algorithm
 void Graph::mstKruskal() const {
-//    std::make_heap()
+    std::vector<Edge> heap;
+
+    for(int v = 0;v <= size;v++)
+    {
+        for(auto& e : table[v])
+        {
+            int u = e.to;
+            
+            if(v < u)
+                heap.push_back(e);
+        }
+    }
+
+    std::make_heap(heap.begin(), heap.end());
+
+    std::sort_heap(heap.begin(), heap.end());
+
+    std::reverse(heap.begin(), heap.end());
+
+    DSets D = DSets(size);
     
     int counter = 0;
+    int totalWeight = 0;
 
-    //while(counter < size - 1) // Might have to be just size
-    //{
+    while(counter < size - 1) // Might have to be just size
+    {
+        auto top = heap.back();
+        heap.pop_back();
+
+        int u = top.to;
+        int v = top.from;
+        int w = top.weight;
         
-    //}
+        if(D.find(u) != D.find(v))
+        {
+            std::cout << "( " << v << ", " << u << ", " << w << ")\n";
+            totalWeight += w;
+            D.join(D.find(u), D.find(v));
+            counter++;
+        }
+    }
+    std::cout << "\nTotal Weight = " << totalWeight << "\n";
 }
 
 // print graph
