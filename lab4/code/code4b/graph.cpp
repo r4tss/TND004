@@ -78,7 +78,7 @@ void Graph::mstPrim() const {
     int v = 1;
     dist[v] = 0;
     done[v] = true;
-    int totalWeight = 0;
+    int total_weight = 0;
 
     while(true)
     {
@@ -109,16 +109,16 @@ void Graph::mstPrim() const {
         done[v] = true;
     }
 
-    for(int i = 2;i <= size;i++)
+    for(int i = 1;i <= size;i++)
     {
-        if(done[i])
+        if(done[i] && dist[i] > 0)
         {
             std::cout << "( " << path[i] << ", " << i << ", " << dist[i] << ")\n";
-            totalWeight += dist[i];
+            total_weight += dist[i];
         }
     }
     
-    std::cout << "Total weight = " << totalWeight << "\n";
+    std::cout << "\nTotal weight = " << total_weight << "\n";
 }
 
 // Kruskal's minimum spanning tree algorithm
@@ -142,16 +142,10 @@ void Graph::mstKruskal() const {
 
     std::reverse(heap.begin(), heap.end());
 
-    for(int i = 0;i < std::ssize(heap);i++)
-    {
-        std::cout << "( " << heap[i].from << ", " << heap[i].to << ", " << heap[i].weight << ")\n";
-    }
-    std::cout << "\n";
-
     DSets D = DSets(size);
     
     int counter = 0;
-    int totalWeight = 0;
+    int total_weight = 0;
 
     while(counter < size - 1) // Might have to be just size
     {
@@ -165,12 +159,12 @@ void Graph::mstKruskal() const {
         if(D.find(u) != D.find(v))
         {
             std::cout << "( " << v << ", " << u << ", " << w << ")\n";
-            totalWeight += w;
+            total_weight += w;
             D.join(D.find(u), D.find(v));
             counter++;
         }
     }
-    std::cout << "\nTotal Weight = " << totalWeight << "\n";
+    std::cout << "\nTotal Weight = " << total_weight << "\n";
 }
 
 // print graph
