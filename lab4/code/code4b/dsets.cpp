@@ -58,21 +58,29 @@ int DSets::find(int x) {
     assert(x >= 1 && x <= std::ssize(V) - 1);
 
     // simple find
-    if (V[x] < 0) {
-        return x;
-    } else {
-        return find(V[x]);
-    }
+    // if (V[x] < 0) {
+    //     return x;
+    // } else {
+    //     return find(V[x]);
+    // }
 
-     // *** TODO ***
+
     // find with path compression
+    if(V[x] < 0)
+        return x;
+    else
+    {
+        int i = find(V[x]);
+        V[x] = i;
+        return i;
+    }
 }
 
 // just in case ...
 void DSets::print() const {
     std::cout << "\n";
 
-    for (auto i = 1; i < std::ssize(V); i++) {
+    for (auto i = 0; i < std::ssize(V); i++) {
         std::cout << std::format("{:4}", i);
     }
     std::cout << "\n";
