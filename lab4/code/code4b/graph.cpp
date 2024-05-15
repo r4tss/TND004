@@ -142,6 +142,12 @@ void Graph::mstKruskal() const {
 
     std::reverse(heap.begin(), heap.end());
 
+    for(int i = 0;i < std::ssize(heap);i++)
+    {
+        std::cout << "( " << heap[i].from << ", " << heap[i].to << ", " << heap[i].weight << ")\n";
+    }
+    std::cout << "\n";
+
     DSets D = DSets(size);
     
     int counter = 0;
