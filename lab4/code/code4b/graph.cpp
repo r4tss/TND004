@@ -75,7 +75,7 @@ void Graph::mstPrim() const {
     std::vector<int> path(size + 1, 0);
     std::vector<bool> done(size + 1, false);
 
-    int v = 1;
+    int v = 4;
     dist[v] = 0;
     done[v] = true;
     int total_weight = 0;
