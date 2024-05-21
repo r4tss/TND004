@@ -114,7 +114,7 @@ void Digraph::pwsssp(int s) const {
     }
 
     dist[s] = 0;
-    done[s] = 0;
+    done[s] = true;
 
     int v = s;
 
